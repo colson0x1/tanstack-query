@@ -9,6 +9,10 @@ export default function NewEventsSection() {
   const { data, isPending, isError, error } = useQuery({
     queryKey: ['events'],
     queryFn: fetchEvents,
+    staleTime: 0,
+    // garbage collection means cached data will be kept for x milliseconds of
+    // time and later it will be removed from the memory
+    // gcTime: 3000,
   });
 
   let content;
