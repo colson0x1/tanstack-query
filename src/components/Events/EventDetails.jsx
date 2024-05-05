@@ -30,6 +30,25 @@ export default function EventDetails() {
       // affected by the fact that an event has been deleted.
       queryClient.invalidateQueries({
         queryKey: ['events'],
+        // refetchType to none makes: when we call invalidateQueries, these
+        // existing queries like 'events' there will not automatically be
+        // triggered again immediately instead they will just be invalidated
+        // and the next time they are required, they will run again. But they
+        // will not be re-triggered immediately which otherwise would be the
+        // default behavior.
+        // And here that's what we want because this makes sure that this
+        // event details query of this page (i.e individual event info page)
+        // is not triggered again but if we then go back to all events page,
+        // the queries on this page will be triggered again because this
+        // component re-rendered again i.e this entire component and all the
+        // nested components But the query on the page on which we triggered
+        // the deletion (i.e individual event page), where this component for
+        // this page was not rerendered will not be triggered just because
+        // we called invalidateQueries
+        // Now with that, if we delete event, we see that request on the
+        // developer tools, we are navigated back to the starting page and
+        // we see no failing request anymore!
+        refetchType: 'none',
       });
       navigate('/events');
     },
