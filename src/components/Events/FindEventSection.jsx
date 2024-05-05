@@ -13,7 +13,7 @@ export default function FindEventSection() {
   // make sure both fetchEvents and queryKey are updated dynamically and lead
   // to different query being sent as this search term changes
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['events', { search: searchTerm }],
+    queryKey: ['events', { searchTerm: searchTerm }],
     // wrapping fetchEvents with anonymous fn and passing an object to
     // fetch events and setting a property name searchTerm in this object
     // Now to also forward the signal there, we can simply accept the object
@@ -21,7 +21,7 @@ export default function FindEventSection() {
     // called by React Query i.e queryFn
     // And therefore, we get the signal here
     // And we can then simply set it as a key value pair in this object here as well
-    queryFn: ({ signal }) => fetchEvents({ signal, searchTerm }),
+    queryFn: ({ signal, queryKey }) => fetchEvents({ signal, ...queryKey[1] }),
     // setting enabled to false won't send the request if no search term was entered
     enabled: searchTerm !== undefined,
   });

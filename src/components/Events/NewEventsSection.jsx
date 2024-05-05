@@ -28,9 +28,13 @@ export default function NewEventsSection() {
   // queryObject but we can use destructuring to pull out the elements that
   // are most important to us.
   const { data, isPending, isError, error } = useQuery({
-    queryKey: ['events'],
-    queryFn: fetchEvents,
-    staleTime: 0,
+    queryKey: ['events', { max: 3 }],
+    // In this object which we're getting from React Query passed into this
+    // queryFn, we also get the queryKey that is responsible for triggering
+    // this fn in queryFn
+    // hence: ...queryKey[1] is same as { max: 3 }
+    queryFn: ({ signal, queryKey }) => fetchEvents({ signal, ...queryKey[1] }),
+    staleTime: 5000,
     // garbage collection means cached data will be kept for x milliseconds of
     // time and later it will be removed from the memory
     // gcTime: 3000,
