@@ -12,6 +12,7 @@ import Modal from '../UI/Modal.jsx';
 import EventForm from './EventForm.jsx';
 import { createNewEvent } from '../../util/http.js';
 import ErrorBlock from '../UI/ErrorBlock.jsx';
+import { queryClient } from '../../util/http.js';
 
 export default function NewEvent() {
   const navigate = useNavigate();
@@ -29,10 +30,38 @@ export default function NewEvent() {
   // isPending will be true if the request is currently on its way otherwise false
   const { mutate, isPending, isError, error } = useMutation({
     mutationFn: createNewEvent,
+    // onSuccess is a fn that will be executed once this mutation is completed
+    // i.e This also makes sure that this code, fn in onSuccess, will only
+    // execute if the mutation did succeed
+    onSuccess: () => {
+      // invalidateQueries: It in the end, tells React Query that the data fetched
+      // by certain queries is outdated now that it should be marked as stale
+      // and that immediate refetch should be triggered if the query belongs
+      // to the component that's currently visible on the screen.
+      /* queryClient.invalidateQueries({ queryKey: ['events'], exact: true }); */
+      // We should built our queryKeys such that they kind of describe the data
+      // we're fetching, it makes sense to invalidate all queries that include
+      // events because all those queries would otherwise be dealing with old data.
+      // Now what happens is when we create new event and submit it, we see that
+      // new event created instantly in the all events section since we're
+      // refetching them behind the scenes immediately because we're invalidating
+      // queries here
+      // Here, this guarantees that all queries that use a certain key operate
+      // on a recent data again!
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      navigate('/events');
+    },
   });
 
   function handleSubmit(formData) {
     mutate({ event: formData });
+    // if we directly use navigate here then we will navigate away before the
+    // mutation succeeds or fails
+    // So if it fails and error message should be displayed, we would never
+    // see that because we instantly navigate away
+    // if we do navigate inside `onSuccess` provided by React Query instead of
+    // doing it here on handleSubmit, we'll stay on the screen until the
+    // mutation did really succeed! So any errors would be shown to us.
   }
 
   return (

@@ -1,3 +1,7 @@
+import { QueryClient } from '@tanstack/react-query';
+
+export const queryClient = new QueryClient();
+
 // We setup that property name, searchTerm by passing an object in
 // findEventSection component
 export async function fetchEvents({ signal, searchTerm }) {
