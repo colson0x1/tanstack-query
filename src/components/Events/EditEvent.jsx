@@ -1,21 +1,33 @@
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import {
+  Link,
+  redirect,
+  useNavigate,
+  useParams,
+  useSubmit,
+  useNavigation,
+} from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 
 import Modal from '../UI/Modal.jsx';
 import EventForm from './EventForm.jsx';
 import { fetchEvent, updateEvent, queryClient } from '../../util/http.js';
-import LoadingIndicator from '../UI/LoadingIndicator.jsx';
 import ErrorBlock from '../UI/ErrorBlock.jsx';
 
 export default function EditEvent() {
   const navigate = useNavigate();
+  const { state } = useNavigation();
+  const submit = useSubmit();
   const params = useParams();
 
-  const { data, isPending, isError, error } = useQuery({
+  const { data, isError, error } = useQuery({
     queryKey: ['events', params.id],
     queryFn: ({ signal }) => fetchEvent({ signal, id: params.id }),
+    // Make sure that the cached data is used without re-fetching it behind
+    // the scenes if that data is less than 10 seconds old.
+    staleTime: 10000,
   });
 
+  /*
   const { mutate } = useMutation({
     mutationFn: updateEvent,
     // onMutate will perform optimistic update. It will be executed right when
@@ -83,10 +95,12 @@ export default function EditEvent() {
       queryClient.invalidateQueries(['events', params.id]);
     },
   });
+  */
 
   function handleSubmit(formData) {
-    mutate({ id: params.id, event: formData });
-    navigate('../');
+    // mutate({ id: params.id, event: formData });
+    // navigate('../');
+    submit(formData, { method: 'PUT' });
   }
 
   function handleClose() {
@@ -94,14 +108,6 @@ export default function EditEvent() {
   }
 
   let content;
-
-  if (isPending) {
-    content = (
-      <div className='center'>
-        <LoadingIndicator />
-      </div>
-    );
-  }
 
   if (isError) {
     content = (
@@ -125,15 +131,54 @@ export default function EditEvent() {
   if (data) {
     content = (
       <EventForm inputData={data} onSubmit={handleSubmit}>
-        <Link to='../' className='button-text'>
-          Cancel
-        </Link>
-        <button type='submit' className='button'>
-          Update
-        </button>
+        {state === 'submitting' ? (
+          <p>Sending data...</p>
+        ) : (
+          <>
+            <Link to='../' className='button-text'>
+              Cancel
+            </Link>
+            <button type='submit' className='button'>
+              Update
+            </button>
+          </>
+        )}
       </EventForm>
     );
   }
 
   return <Modal onClose={handleClose}>{content}</Modal>;
+}
+
+// loader fn is eventually executed by React Router, it will receive an object
+// which will include a params property, which gives us access to the route
+// parameters of this active route.
+export function loader({ params }) {
+  // fetchQuery method is used to trigger a query programatically. so do it
+  // ourself without using the useQuery hook.
+  // fetchQuery takes the same configuration object as useQuery did.
+  return queryClient.fetchQuery({
+    queryKey: ['events', params.id],
+    queryFn: ({ signal }) => fetchEvent({ signal, id: params.id }),
+  });
+}
+
+// This action fn will be triggerd by React Router when form on this page
+// is submitted
+// In this action fn, we get an object passed in automatically by React Router
+// that will have a request property with information about that submitted form
+// in the end and params property with information about this route to which
+// this form submission belongs.
+// only for the non-GET method will the action fn be triggered by React Router
+export async function action({ request, params }) {
+  // extract formData that was submitted by awaiting
+  const formData = await request.formData();
+  // transform more complex formData object yielded by formData method to
+  // a simple key value pair object in JS
+  const updatedEventData = Object.fromEntries(formData);
+  await updateEvent({ id: params.id, event: updatedEventData });
+  // make sure that the updated data is fetched again.
+  // we should also await this because invalidateQueries also returns a promise
+  await queryClient.invalidateQueries(['events']);
+  return redirect('../');
 }
