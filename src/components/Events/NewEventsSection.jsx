@@ -6,6 +6,9 @@ import EventItem from './EventItem.jsx';
 import { fetchEvents } from '../../util/http.js';
 
 export default function NewEventsSection() {
+  // React Query passes some default data to the queryFn
+  // Its an object that contains queryKey and signals
+
   // All useQuery wants is a fn (i.e queryFn) that returns a Promise
   // THat is its requirement here
   // fetchEvents will be executed by TanStack Query to fetch our data
