@@ -8,11 +8,11 @@ import EventItem from './EventItem';
 
 export default function FindEventSection() {
   const searchElement = useRef();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState();
 
   // make sure both fetchEvents and queryKey are updated dynamically and lead
   // to different query being sent as this search term changes
-  const { data, isPending, isError, error } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['events', { search: searchTerm }],
     // wrapping fetchEvents with anonymous fn and passing an object to
     // fetch events and setting a property name searchTerm in this object
@@ -22,6 +22,8 @@ export default function FindEventSection() {
     // And therefore, we get the signal here
     // And we can then simply set it as a key value pair in this object here as well
     queryFn: ({ signal }) => fetchEvents({ signal, searchTerm }),
+    // setting enabled to false won't send the request if no search term was entered
+    enabled: searchTerm !== undefined,
   });
 
   function handleSubmit(event) {
@@ -31,7 +33,7 @@ export default function FindEventSection() {
 
   let content = <p>Please enter a search term and to find events.</p>;
 
-  if (isPending) {
+  if (isLoading) {
     content = <LoadingIndicator />;
   }
 
