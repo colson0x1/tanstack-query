@@ -1,8 +1,21 @@
-# React + Vite
+# TanStack Query
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![tanstack query](https://i.imgur.com/MtA1xSJ.png)
 
-Currently, two official plugins are available:
+![tanstack query](https://i.imgur.com/FBMe06N.png)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+![tanstack query](https://i.imgur.com/LZriagh.png)
+
+![tanstack query](https://i.imgur.com/BgyOmy3.png)
+
+![tanstack query](https://i.imgur.com/d924thu.png)
+
+![tanstack query](https://i.imgur.com/odex6UX.png)
+
+![tanstack query](https://i.imgur.com/B0VPj9r.png)
+
+![tanstack query](https://i.imgur.com/hwCFr5d.png)
+
+![tanstack query](https://i.imgur.com/qFFGYKt.png)
+
+![tanstack query](https://i.imgur.com/vheRF4t.png)
